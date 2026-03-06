@@ -1,0 +1,46 @@
+services:
+
+  mysql-db:
+    image: mysql:8
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: kavya
+    ports:
+      - "3307:3306"
+
+  discovery-server:
+    build: ./discovery-server
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-server
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - discovery-server
+      - mysql-db
+
+  property-service:
+    build: ./property-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - discovery-server
+      - mysql-db
+
+  booking-service:
+    build: ./booking-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - discovery-server
+      - mysql-db
