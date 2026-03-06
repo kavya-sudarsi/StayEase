@@ -163,17 +163,18 @@ Each microservice maintains its **own database**.
 This ensures **loose coupling and independent scaling**.
 
 
-##  Running the Project
+## ▶ Running the Project
 
 ### 1. Clone the repository
 
 ```bash
 git clone https://github.com/your-repo/stayease.git
-2. Create MySQL Databases
+```
+### 2. Create MySQL Databases
 stayease_auth
 stayease_property
 stayease_booking
-3. Start Services in Order
+### 3. Start Services in Order
 
 Eureka Server
 
@@ -185,16 +186,17 @@ Booking Service
 
 API Gateway
 
-4. Access the Application
+### 4. Access the Application
 http://localhost:8080
-👩‍💻 Author
 
-Kavya Sudarsi
+## 👩‍💻 Author
+
+#### Kavya Sudarsi
 
 Built as a hands-on project to demonstrate:
 
-Microservices architecture
+- Microservices architecture
 
-Secure service communication
+- Secure service communication
 
-Distributed system design
+- Distributed system design
