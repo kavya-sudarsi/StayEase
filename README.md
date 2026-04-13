@@ -32,7 +32,6 @@ Database Layer
 
 Each microservice is **independently deployable** and communicates using **service discovery and Feign clients**.
 
-
 ## 🔧 Microservices
 
 ### Auth Service
@@ -161,6 +160,11 @@ Each microservice maintains its **own database**.
 | Booking Service | stayease_booking |
 
 This ensures **loose coupling and independent scaling**.
+
+
+## 📸 Screenshots
+<img width="1915" height="953" alt="Screenshot 2026-03-24 175845" src="https://github.com/user-attachments/assets/0fb1cf2c-69fd-4868-bc1e-192b60e3bef1" /><img width="330" height="127" alt="Screenshot 2026-03-24 175913" src="https://github.com/user-attachments/assets/638a400d-5bd5-4c38-8207-78cfa8f5e77c" />
+<img width="1373" height="30" alt="Screenshot 2026-03-24 180040" src="https://github.com/user-attachments/assets/10bb232c-46e0-4ae4-abdd-3f3d5b4650fc" />
 
 
 ## ▶ Running the Project
