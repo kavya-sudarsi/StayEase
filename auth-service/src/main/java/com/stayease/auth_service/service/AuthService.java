@@ -1,12 +1,16 @@
 package com.stayease.auth_service.service;
 
-import com.stayease.auth_service.dto.*;
+import com.stayease.auth_service.dto.AuthResponse;
+import com.stayease.auth_service.dto.LoginRequest;
+import com.stayease.auth_service.dto.RegisterRequest;
 import com.stayease.auth_service.entity.User;
 import com.stayease.auth_service.repository.UserRepository;
 import com.stayease.auth_service.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -16,10 +20,15 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public String register(RegisterRequest request) {
+    // REGISTER
+    public AuthResponse register(RegisterRequest request) {
 
+        // check duplicate email
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("User already exists");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email already exists"
+            );
         }
 
         User user = User.builder()
@@ -31,19 +40,40 @@ public class AuthService {
 
         userRepository.save(user);
 
-        return "User registered successfully";
+        // generate token immediately after register
+        String token = jwtUtil.generateToken(
+                user.getEmail(),
+                user.getRole()
+        );
+
+        return new AuthResponse(token);
     }
 
+    // LOGIN
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "User not found"
+                        ));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+        // check password
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid password"
+            );
         }
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        String token = jwtUtil.generateToken(
+                user.getEmail(),
+                user.getRole()
+        );
 
         return new AuthResponse(token);
     }
