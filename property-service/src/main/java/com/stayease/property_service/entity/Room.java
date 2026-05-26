@@ -23,6 +23,9 @@ public class Room {
 
     private int availableBeds;
 
+    // NEW
+    private Double pricePerBed;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "property_id")

@@ -12,4 +12,8 @@ public class RoomRequest {
 
     @Min(1)
     private int totalBeds;
+
+    // NEW
+    @Min(1)
+    private Double pricePerBed;
 }

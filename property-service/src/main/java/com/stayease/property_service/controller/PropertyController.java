@@ -100,6 +100,23 @@ public class PropertyController {
         roomService.increaseAvailableBeds(roomId);
         return ResponseEntity.ok().build();
     }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProperty(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Email") String email,
+            @RequestHeader("X-User-Role") String role) {
+
+        if (!role.equals("OWNER")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only OWNER can delete property");
+        }
+
+        propertyService.deleteProperty(id, email);
+
+        return ResponseEntity.ok().build();
+    }
     // ===== Mapping Methods =====
 
     private PropertyResponse mapToPropertyResponse(Property property) {
@@ -129,6 +146,35 @@ public class PropertyController {
                 .roomNumber(room.getRoomNumber())
                 .totalBeds(room.getTotalBeds())
                 .availableBeds(room.getAvailableBeds())
+                .pricePerBed(room.getPricePerBed())
                 .build();
+    }
+
+    @GetMapping("/my-properties")
+    public List<PropertyResponse> getOwnerProperties(
+            @RequestHeader("X-User-Email") String email) {
+
+        return propertyService.getOwnerProperties(email)
+                .stream()
+                .map(this::mapToPropertyResponse)
+                .collect(Collectors.toList());
+    }
+
+    @DeleteMapping("/rooms/{roomId}")
+    public ResponseEntity<Void> deleteRoom(
+            @PathVariable Long roomId,
+            @RequestHeader("X-User-Email") String email,
+            @RequestHeader("X-User-Role") String role) {
+
+        if (!role.equals("OWNER")) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only OWNER can delete room"
+            );
+        }
+
+        roomService.deleteRoom(roomId, email);
+
+        return ResponseEntity.ok().build();
     }
 }

@@ -8,7 +8,13 @@ import lombok.Data;
 public class RoomResponse {
 
     private Long id;
+
     private String roomNumber;
+
     private int totalBeds;
+
     private int availableBeds;
+
+    // NEW
+    private Double pricePerBed;
 }
