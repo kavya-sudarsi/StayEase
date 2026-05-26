@@ -20,8 +20,6 @@ public class Property {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // BASIC INFO
-
     @Column(nullable = false)
     private String name;
 
@@ -37,8 +35,6 @@ public class Property {
     @Column(length = 1000)
     private String description;
 
-    // PROPERTY DETAILS
-
     @Enumerated(EnumType.STRING)
     private PropertyType propertyType;
 
@@ -49,7 +45,6 @@ public class Property {
 
     private String imageUrl;
 
-    // AMENITIES
 
     @ElementCollection
     @CollectionTable(
@@ -59,19 +54,13 @@ public class Property {
     @Column(name = "amenity")
     private List<String> amenities;
 
-    // STATUS
-
     @Enumerated(EnumType.STRING)
     private PropertyStatus status;
 
     private LocalDateTime createdAt;
 
-    // OWNER EMAIL
-
     @Column(nullable = false)
     private String ownerEmail;
-
-    // ROOMS
 
     @JsonManagedReference
     @OneToMany(

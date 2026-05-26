@@ -10,10 +10,16 @@ public class RoomRequest {
     @NotBlank
     private String roomNumber;
 
+    // 1-sharing / 2-sharing / 3-sharing
+    private String roomType;
+
     @Min(1)
     private int totalBeds;
 
-    // NEW
     @Min(1)
     private Double pricePerBed;
+
+    private boolean wifi;
+
+    private boolean ac;
 }

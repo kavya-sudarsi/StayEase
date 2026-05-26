@@ -11,10 +11,15 @@ public class RoomResponse {
 
     private String roomNumber;
 
+    private String roomType;
+
     private int totalBeds;
 
     private int availableBeds;
 
-    // NEW
     private Double pricePerBed;
+
+    private boolean wifi;
+
+    private boolean ac;
 }

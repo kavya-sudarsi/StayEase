@@ -1,5 +1,7 @@
 package com.stayease.property_service.service;
 
+import com.stayease.property_service.dto.PropertyRequest;
+import com.stayease.property_service.entity.GenderType;
 import com.stayease.property_service.entity.Property;
 import com.stayease.property_service.repository.PropertyRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,17 +19,14 @@ public class PropertyService {
 
     // CREATE PROPERTY
     public Property createProperty(Property property) {
+
         return propertyRepository.save(property);
     }
 
-    // GET ALL PROPERTIES (PUBLIC)
+    // GET ALL PROPERTIES
     public List<Property> getAllProperties() {
-        return propertyRepository.findAll();
-    }
 
-    // GET OWNER PROPERTIES
-    public List<Property> getOwnerProperties(String email) {
-        return propertyRepository.findByOwnerEmail(email);
+        return propertyRepository.findAll();
     }
 
     // GET PROPERTY BY ID
@@ -41,15 +40,47 @@ public class PropertyService {
                         ));
     }
 
+    // GET OWNER PROPERTIES
+    public List<Property> getOwnerProperties(
+            String email
+    ) {
+        return propertyRepository.findByOwnerEmail(email);
+    }
+
+    // UPDATE PROPERTY
+    public Property updateProperty(
+            Long propertyId,
+            PropertyRequest request,
+            String email
+    ) {
+        Property property = getProperty(propertyId);
+
+        if (!property.getOwnerEmail().equals(email)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You can update only your property"
+            );
+        }
+
+        property.setName(request.getName());
+        property.setAddress(request.getAddress());
+        property.setCity(request.getCity());
+        property.setState(request.getState());
+        property.setPincode(request.getPincode());
+        property.setDescription(request.getDescription());
+        property.setPropertyType(request.getPropertyType());
+        property.setGender(request.getGender());
+        property.setContactNumber(request.getContactNumber());
+        property.setImageUrl(request.getImageUrl());
+        property.setAmenities(request.getAmenities());
+
+        return propertyRepository.save(property);
+    }
+
     // DELETE PROPERTY
     public void deleteProperty(Long id, String email) {
 
-        Property property = propertyRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Property not found"
-                        ));
+        Property property = getProperty(id);
 
         if (!property.getOwnerEmail().equals(email)) {
             throw new ResponseStatusException(
@@ -59,5 +90,28 @@ public class PropertyService {
         }
 
         propertyRepository.delete(property);
+    }
+
+    // SEARCH BY CITY
+    public List<Property> searchByCity(String city) {
+
+        return propertyRepository.findByCityIgnoreCase(city);
+    }
+
+    // FILTER BY GENDER
+    public List<Property> filterByGender(GenderType gender) {
+
+        return propertyRepository.findByGender(gender);
+    }
+
+    // FILTER BY PRICE
+    public List<Property> filterByPrice(
+            Double minPrice,
+            Double maxPrice
+    ) {
+        return propertyRepository.findByPriceRange(
+                minPrice,
+                maxPrice
+        );
     }
 }

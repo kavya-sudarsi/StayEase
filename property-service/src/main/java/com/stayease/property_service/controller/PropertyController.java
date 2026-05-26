@@ -1,7 +1,9 @@
 package com.stayease.property_service.controller;
 
 import com.stayease.property_service.dto.*;
+import com.stayease.property_service.entity.GenderType;
 import com.stayease.property_service.entity.Property;
+import com.stayease.property_service.entity.PropertyStatus;
 import com.stayease.property_service.entity.Room;
 import com.stayease.property_service.service.PropertyService;
 import com.stayease.property_service.service.RoomService;
@@ -12,8 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/properties")
@@ -23,103 +25,248 @@ public class PropertyController {
     private final PropertyService propertyService;
     private final RoomService roomService;
 
-    // Create Property
+    // CREATE PROPERTY
     @PostMapping
-    public PropertyResponse createProperty(
+    public ResponseEntity<PropertyResponse> createProperty(
             @RequestHeader("X-User-Email") String email,
             @RequestHeader("X-User-Role") String role,
             @Valid @RequestBody PropertyRequest request) {
 
-        if (!role.equals("OWNER")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Only OWNER can create property");
-        }
+        validateOwner(role);
 
         Property property = Property.builder()
                 .name(request.getName())
                 .address(request.getAddress())
+                .city(request.getCity())
+                .state(request.getState())
+                .pincode(request.getPincode())
+                .description(request.getDescription())
+                .propertyType(request.getPropertyType())
+                .gender(request.getGender())
+                .contactNumber(request.getContactNumber())
+                .imageUrl(request.getImageUrl())
+                .amenities(request.getAmenities())
+                .status(PropertyStatus.ACTIVE)
+                .createdAt(LocalDateTime.now())
                 .ownerEmail(email)
                 .build();
 
         Property saved = propertyService.createProperty(property);
 
-        return mapToPropertyResponse(saved);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(mapToPropertyResponse(saved));
     }
 
-    // Add Room
+    // ADD ROOM
     @PostMapping("/{propertyId}/rooms")
-    public RoomResponse addRoom(
+    public ResponseEntity<RoomResponse> addRoom(
             @PathVariable Long propertyId,
             @RequestHeader("X-User-Email") String email,
             @RequestHeader("X-User-Role") String role,
             @Valid @RequestBody RoomRequest request) {
 
-        if (!role.equals("OWNER")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Only OWNER can add rooms");
-        }
+        validateOwner(role);
 
         Room room = roomService.addRoom(propertyId, request, email);
 
-        return mapToRoomResponse(room);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(mapToRoomResponse(room));
     }
 
-    // Get All Properties
+    // GET ALL PROPERTIES
     @GetMapping
-    public List<PropertyResponse> getAllProperties() {
+    public ResponseEntity<List<PropertyResponse>> getAllProperties() {
 
-        return propertyService.getAllProperties()
-                .stream()
-                .map(this::mapToPropertyResponse)
-                .collect(Collectors.toList());
+        List<PropertyResponse> properties =
+                propertyService.getAllProperties()
+                        .stream()
+                        .map(this::mapToPropertyResponse)
+                        .toList();
+
+        return ResponseEntity.ok(properties);
     }
 
-    // Get Room By ID
-    @GetMapping("/rooms/{roomId}")
-    public RoomResponse getRoom(@PathVariable Long roomId) {
+    // GET PROPERTY BY ID
+    @GetMapping("/{propertyId}")
+    public ResponseEntity<PropertyResponse> getPropertyById(
+            @PathVariable Long propertyId) {
 
-        Room room = roomService.getRoom(roomId);
+        Property property = propertyService.getProperty(propertyId);
 
-        return mapToRoomResponse(room);
+        return ResponseEntity.ok(mapToPropertyResponse(property));
     }
 
-    // Decrease Beds
-    @PutMapping("/rooms/{roomId}/decrease")
-    public ResponseEntity<Void> decreaseAvailableBeds(
-            @PathVariable Long roomId) {
+    // SEARCH BY CITY
+    @GetMapping("/search")
+    public ResponseEntity<List<PropertyResponse>> searchByCity(
+            @RequestParam String city) {
 
-        roomService.decreaseAvailableBeds(roomId);
-        return ResponseEntity.ok().build();
+        List<PropertyResponse> properties =
+                propertyService.searchByCity(city)
+                        .stream()
+                        .map(this::mapToPropertyResponse)
+                        .toList();
+
+        return ResponseEntity.ok(properties);
     }
 
+    // FILTER BY GENDER
+    @GetMapping("/filter/gender")
+    public ResponseEntity<List<PropertyResponse>> filterByGender(
+            @RequestParam String gender) {
 
-    @PutMapping("/rooms/{roomId}/increase")
-    public ResponseEntity<Void> increaseAvailableBeds(
-            @PathVariable Long roomId) {
+        GenderType genderType;
+        try {
+            genderType = GenderType.valueOf(gender.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid gender type. Use MALE, FEMALE, or CO_ED"
+            );
+        }
 
-        roomService.increaseAvailableBeds(roomId);
-        return ResponseEntity.ok().build();
+        List<PropertyResponse> properties =
+                propertyService.filterByGender(genderType)
+                        .stream()
+                        .map(this::mapToPropertyResponse)
+                        .toList();
+
+        return ResponseEntity.ok(properties);
     }
 
+    // FILTER BY PRICE
+    @GetMapping("/filter/price")
+    public ResponseEntity<List<PropertyResponse>> filterByPrice(
+            @RequestParam Double minPrice,
+            @RequestParam Double maxPrice) {
 
+        List<PropertyResponse> properties =
+                propertyService.filterByPrice(minPrice, maxPrice)
+                        .stream()
+                        .map(this::mapToPropertyResponse)
+                        .toList();
+
+        return ResponseEntity.ok(properties);
+    }
+
+    // GET OWNER PROPERTIES
+    @GetMapping("/my-properties")
+    public ResponseEntity<List<PropertyResponse>> getOwnerProperties(
+            @RequestHeader("X-User-Email") String email) {
+
+        List<PropertyResponse> properties =
+                propertyService.getOwnerProperties(email)
+                        .stream()
+                        .map(this::mapToPropertyResponse)
+                        .toList();
+
+        return ResponseEntity.ok(properties);
+    }
+
+    // UPDATE PROPERTY
+    @PutMapping("/{propertyId}")
+    public ResponseEntity<PropertyResponse> updateProperty(
+            @PathVariable Long propertyId,
+            @RequestHeader("X-User-Email") String email,
+            @RequestHeader("X-User-Role") String role,
+            @Valid @RequestBody PropertyRequest request) {
+
+        validateOwner(role);
+
+        Property updated = propertyService.updateProperty(
+                propertyId, request, email);
+
+        return ResponseEntity.ok(mapToPropertyResponse(updated));
+    }
+
+    // DELETE PROPERTY
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProperty(
             @PathVariable Long id,
             @RequestHeader("X-User-Email") String email,
             @RequestHeader("X-User-Role") String role) {
 
-        if (!role.equals("OWNER")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Only OWNER can delete property");
-        }
+        validateOwner(role);
 
         propertyService.deleteProperty(id, email);
 
+        return ResponseEntity.noContent().build();
+    }
+
+    // GET ROOM
+    @GetMapping("/rooms/{roomId}")
+    public ResponseEntity<RoomResponse> getRoom(
+            @PathVariable Long roomId) {
+
+        Room room = roomService.getRoom(roomId);
+
+        return ResponseEntity.ok(mapToRoomResponse(room));
+    }
+
+    // UPDATE ROOM
+    @PutMapping("/rooms/{roomId}")
+    public ResponseEntity<RoomResponse> updateRoom(
+            @PathVariable Long roomId,
+            @RequestHeader("X-User-Email") String email,
+            @RequestHeader("X-User-Role") String role,
+            @Valid @RequestBody RoomRequest request) {
+
+        validateOwner(role);
+
+        Room updated = roomService.updateRoom(roomId, request, email);
+
+        return ResponseEntity.ok(mapToRoomResponse(updated));
+    }
+
+    // DELETE ROOM
+    @DeleteMapping("/rooms/{roomId}")
+    public ResponseEntity<Void> deleteRoom(
+            @PathVariable Long roomId,
+            @RequestHeader("X-User-Email") String email,
+            @RequestHeader("X-User-Role") String role) {
+
+        validateOwner(role);
+
+        roomService.deleteRoom(roomId, email);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // DECREASE BEDS
+    @PutMapping("/rooms/{roomId}/decrease")
+    public ResponseEntity<Void> decreaseAvailableBeds(
+            @PathVariable Long roomId) {
+
+        roomService.decreaseAvailableBeds(roomId);
+
         return ResponseEntity.ok().build();
     }
-    // ===== Mapping Methods =====
 
-    private PropertyResponse mapToPropertyResponse(Property property) {
+    // INCREASE BEDS
+    @PutMapping("/rooms/{roomId}/increase")
+    public ResponseEntity<Void> increaseAvailableBeds(
+            @PathVariable Long roomId) {
+
+        roomService.increaseAvailableBeds(roomId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    // ROLE VALIDATION HELPER
+    private void validateOwner(String role) {
+        if (!role.equals("OWNER")) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only OWNER can perform this action"
+            );
+        }
+    }
+
+    // PROPERTY RESPONSE MAPPING
+    private PropertyResponse mapToPropertyResponse(
+            Property property) {
 
         List<RoomResponse> rooms = null;
 
@@ -127,54 +274,41 @@ public class PropertyController {
             rooms = property.getRooms()
                     .stream()
                     .map(this::mapToRoomResponse)
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         return PropertyResponse.builder()
                 .id(property.getId())
                 .name(property.getName())
                 .address(property.getAddress())
+                .city(property.getCity())
+                .state(property.getState())
+                .pincode(property.getPincode())
+                .description(property.getDescription())
+                .propertyType(property.getPropertyType())
+                .gender(property.getGender())
+                .contactNumber(property.getContactNumber())
+                .imageUrl(property.getImageUrl())
+                .amenities(property.getAmenities())
+                .status(property.getStatus())
+                .createdAt(property.getCreatedAt())
                 .ownerEmail(property.getOwnerEmail())
                 .rooms(rooms)
                 .build();
     }
 
+    // ROOM RESPONSE MAPPING
     private RoomResponse mapToRoomResponse(Room room) {
 
         return RoomResponse.builder()
                 .id(room.getId())
                 .roomNumber(room.getRoomNumber())
+                .roomType(room.getRoomType())
                 .totalBeds(room.getTotalBeds())
                 .availableBeds(room.getAvailableBeds())
                 .pricePerBed(room.getPricePerBed())
+                .wifi(room.isWifi())
+                .ac(room.isAc())
                 .build();
-    }
-
-    @GetMapping("/my-properties")
-    public List<PropertyResponse> getOwnerProperties(
-            @RequestHeader("X-User-Email") String email) {
-
-        return propertyService.getOwnerProperties(email)
-                .stream()
-                .map(this::mapToPropertyResponse)
-                .collect(Collectors.toList());
-    }
-
-    @DeleteMapping("/rooms/{roomId}")
-    public ResponseEntity<Void> deleteRoom(
-            @PathVariable Long roomId,
-            @RequestHeader("X-User-Email") String email,
-            @RequestHeader("X-User-Role") String role) {
-
-        if (!role.equals("OWNER")) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Only OWNER can delete room"
-            );
-        }
-
-        roomService.deleteRoom(roomId, email);
-
-        return ResponseEntity.ok().build();
     }
 }
