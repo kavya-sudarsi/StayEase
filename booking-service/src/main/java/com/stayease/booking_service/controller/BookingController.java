@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
@@ -28,5 +30,12 @@ public class BookingController {
             @PathVariable Long bookingId) {
 
         return bookingService.cancelBooking(userEmail, bookingId);
+    }
+
+    @GetMapping("/my-bookings")
+    public List<BookingResponse> getMyBookings(
+            @RequestHeader("X-User-Email") String userEmail) {
+
+        return bookingService.getMyBookings(userEmail);
     }
 }

@@ -5,6 +5,12 @@ spring:
   application:
     name: booking-service
 
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
   datasource:
     url: jdbc:mysql://mysql-db:3306/stayease_booking
     username: root
@@ -24,6 +30,15 @@ eureka:
   client:
     service-url:
       defaultZone: http://discovery-server:8761/eureka
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      propertyService:
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
 
 management:
   endpoints:
