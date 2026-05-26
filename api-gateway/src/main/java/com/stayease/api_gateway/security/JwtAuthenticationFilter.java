@@ -52,14 +52,14 @@ public class JwtAuthenticationFilter implements GlobalFilter {
                     .build();
 
             // Role-based rule: Only OWNER can create property
-            if (path.startsWith("/properties")
-                    && exchange.getRequest().getMethod() == HttpMethod.POST) {
-
-                if (!"OWNER".equals(role)) {
-                    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-                    return exchange.getResponse().setComplete();
-                }
-            }
+ //           if (path.startsWith("/properties")
+//                    && exchange.getRequest().getMethod() == HttpMethod.POST) {
+//
+//                if (!"OWNER".equals(role)) {
+//                    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+//                    return exchange.getResponse().setComplete();
+//                }
+//            }
 
         } catch (Exception e) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

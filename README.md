@@ -1,202 +1,206 @@
-🏨 StayEase – Microservices-Based Accommodation Platform
- Project Overview
+# 🏨 StayEase – Microservices-Based Accommodation Platform
 
-StayEase is a Spring Boot microservices application designed to manage PG/hostel accommodations.
-It implements centralized authentication, API Gateway routing, service discovery, and secure booking workflows with distributed inventory management.
+## 📌 Overview
 
-This project demonstrates real-world microservices architecture with inter-service communication and role-based security.
+**StayEase** is a **Spring Boot microservices-based accommodation management platform** for managing **PG/hostel properties, room inventory, and booking workflows**.
 
-Architecture Overview
-Client
-   ↓
-API Gateway (JWT Validation)
-   ↓
-Eureka Server (Service Discovery)
-   ↓
------------------------------------------
-| Auth Service      | Property Service |
-| Booking Service   |                  |
------------------------------------------
-   ↓
-Separate MySQL Database per Service
- Microservices Breakdown
-1. Eureka Server
+The system demonstrates a **real-world microservices architecture** with:
 
-Service discovery
+- API Gateway routing  
+- Service discovery using Eureka  
+- JWT-based authentication  
+- Role-based authorization  
+- Inter-service communication using OpenFeign  
+- Distributed inventory management  
 
-Dynamic registration of all services
 
-No hardcoded URLs
+## 🏗 Architecture Overview
 
-2. API Gateway
+Client  
 
-Single entry point
+API Gateway  
 
-JWT validation
+Eureka Server  
 
-Role-based request filtering
+Microservices
+- Auth Service
+- Property Service
+- Booking Service
 
-Header propagation to downstream services
+Database Layer
+- Separate MySQL Database per Service
 
-3. Auth Service
+Each microservice is **independently deployable** and communicates using **service discovery and Feign clients**.
 
-User registration
+## 🔧 Microservices
 
-Login authentication
+### Auth Service
 
-JWT generation
+Handles **authentication and user management**.
 
-Role support (OWNER, USER)
+**Features**
 
-4. Property Service
+- User registration  
+- Login authentication  
+- JWT token generation  
+- Role-based access  
 
-Owner-only property creation
+**Roles Supported**
 
-Room management
+- OWNER  
+- USER  
 
-Bed inventory tracking
 
-Increase/decrease bed logic
+### Property Service
 
-DTO-based API design
+Manages **properties, rooms, and bed inventory**.
 
-Global exception handling
+**Features**
 
-5. Booking Service
+- Property creation (OWNER only)  
+- Room management  
+- Bed availability tracking  
+- Increase / decrease available beds  
 
-Booking creation
 
-Booking cancellation
+### Booking Service
 
-Feign client for inter-service communication
+Handles **booking operations**.
 
-Distributed inventory synchronization
+**Features**
 
-Conflict handling (409 when no beds available)
+- Create booking  
+- Cancel booking  
+- Feign communication with Property Service  
+- Bed inventory synchronization  
+- Conflict handling when beds are unavailable  
 
-Ownership validation
 
-Security Features
+### API Gateway
 
-JWT-based authentication
+Acts as the **single entry point** for all requests.
 
-Role-based access control
+**Responsibilities**
 
-OWNER can create properties & rooms
+- Request routing  
+- JWT validation  
+- Forwarding requests to microservices  
 
-USER can create & cancel bookings
 
-Header forwarding via API Gateway
+### Eureka Server
 
-Booking Workflow
+Provides **service discovery**.
 
-User logs in and receives JWT token
+**Responsibilities**
 
-Request goes through API Gateway
+- Register services dynamically  
+- Enable services to locate each other  
+- Remove hardcoded URLs  
 
-Gateway validates JWT
 
-Booking Service calls Property Service to decrease beds
 
-If beds available → booking saved
+## 🔐 Security
 
-If no beds → 409 Conflict returned
+The system uses **JWT-based authentication**.
 
-On cancellation → beds are increased again
+### Authentication Flow
 
-🛠 Tech Stack
+1. User logs in with credentials  
+2. Request is processed by the Auth Service  
+3. Auth Service generates a JWT token  
+4. Client includes the JWT token in subsequent requests  
+5. API Gateway validates the token  
+6. Request is forwarded to the respective microservice  
 
-Java 17
 
-Spring Boot
+## 👥 Role-Based Access
 
-Spring Cloud (Eureka, Gateway)
+| Role | Permissions |
+|-----|-------------|
+| OWNER | Create properties and rooms |
+| USER | Create and cancel bookings |
 
-Spring Security
 
-OpenFeign
+## 📦 Booking Workflow
 
-JPA / Hibernate
+1. User logs in and receives a JWT token  
+2. Client sends request with token  
+3. API Gateway validates the token  
+4. Booking Service processes the request  
+5. Booking Service calls Property Service using Feign  
+6. Property Service updates bed availability  
+7. Booking is created if beds are available  
 
-MySQL
 
-Maven
+## 🛠 Tech Stack
 
-📂 Database Strategy
+| Technology | Purpose |
+|------------|--------|
+| Java 17 | Programming language |
+| Spring Boot | Microservices framework |
+| Spring Cloud | Gateway & service discovery |
+| Eureka Server | Service registry |
+| Spring Security | Authentication & authorization |
+| JWT | Secure authentication |
+| OpenFeign | Inter-service communication |
+| JPA / Hibernate | ORM |
+| MySQL | Database |
+| Maven | Dependency management |
+| Docker | Containerization |
 
-Each microservice maintains its own database:
 
-auth_db
+## 🗄 Database Strategy
 
-property_db
+Each microservice maintains its **own database**.
 
-booking_db
+| Service | Database |
+|--------|---------|
+| Auth Service | stayease_auth |
+| Property Service | stayease_property |
+| Booking Service | stayease_booking |
 
-This ensures loose coupling and independent scaling.
+This ensures **loose coupling and independent scaling**.
 
-🚀 How To Run
 
-Start Eureka Server
+## 📸 Screenshots
+<img width="1915" height="953" alt="Screenshot 2026-03-24 175845" src="https://github.com/user-attachments/assets/0fb1cf2c-69fd-4868-bc1e-192b60e3bef1" /><img width="330" height="127" alt="Screenshot 2026-03-24 175913" src="https://github.com/user-attachments/assets/638a400d-5bd5-4c38-8207-78cfa8f5e77c" />
+<img width="1373" height="30" alt="Screenshot 2026-03-24 180040" src="https://github.com/user-attachments/assets/10bb232c-46e0-4ae4-abdd-3f3d5b4650fc" />
 
-Start Auth Service
 
-Start Property Service
+## ▶ Running the Project
 
-Start Booking Service
+### 1. Clone the repository
 
-Start API Gateway
+```bash
+git clone https://github.com/your-repo/stayease.git
+```
+### 2. Create MySQL Databases
+stayease_auth
+stayease_property
+stayease_booking
+### 3. Start Services in Order
 
-Access services via:
+Eureka Server
+
+Auth Service
+
+Property Service
+
+Booking Service
+
+API Gateway
+
+### 4. Access the Application
 http://localhost:8080
 
-Sample APIs
-Login
-POST /auth/login
-Create Property (OWNER)
-POST /properties
-Add Room
-POST /properties/{id}/rooms
-Create Booking (USER)
-POST /bookings
-Cancel Booking
-PUT /bookings/{id}/cancel
-⚠ Error Handling
+## 👩‍💻 Author
 
-All services implement centralized global exception handling with standardized JSON response format:
+#### Kavya Sudarsi
 
-{
-  "timestamp": "...",
-  "status": 409,
-  "error": "Conflict",
-  "message": "No beds available",
-  "path": "/bookings"
-}
- Key Highlights
+Built as a hands-on project to demonstrate:
 
-Distributed workflow management
+- Microservices architecture
 
-Inventory consistency across services
+- Secure service communication
 
-Proper HTTP status usage
-
-DTO-based API design
-
-Clean layered architecture
-
-Structured global error handling
-
-📌 Future Enhancements
-
-Docker support
-
-Config Server
-
-Circuit breaker (Resilience4j)
-
-Swagger API documentation
-
-Centralized logging
-
-Author
-
-Developed as a hands-on microservices architecture project to demonstrate distributed system design and secure service communication.
+- Distributed system design
