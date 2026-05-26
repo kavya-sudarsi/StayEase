@@ -5,6 +5,8 @@ import com.stayease.booking_service.dto.BookingResponse;
 import com.stayease.booking_service.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,26 +18,40 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    // CREATE BOOKING
     @PostMapping
-    public BookingResponse createBooking(
+    public ResponseEntity<BookingResponse> createBooking(
             @RequestHeader("X-User-Email") String userEmail,
             @Valid @RequestBody BookingRequest request) {
 
-        return bookingService.createBooking(userEmail, request);
+        BookingResponse response =
+                bookingService.createBooking(userEmail, request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
+    // CANCEL BOOKING
     @PutMapping("/{bookingId}/cancel")
-    public BookingResponse cancelBooking(
+    public ResponseEntity<BookingResponse> cancelBooking(
             @RequestHeader("X-User-Email") String userEmail,
             @PathVariable Long bookingId) {
 
-        return bookingService.cancelBooking(userEmail, bookingId);
+        BookingResponse response =
+                bookingService.cancelBooking(userEmail, bookingId);
+
+        return ResponseEntity.ok(response);
     }
 
+    // GET MY BOOKINGS
     @GetMapping("/my-bookings")
-    public List<BookingResponse> getMyBookings(
+    public ResponseEntity<List<BookingResponse>> getMyBookings(
             @RequestHeader("X-User-Email") String userEmail) {
 
-        return bookingService.getMyBookings(userEmail);
+        List<BookingResponse> bookings =
+                bookingService.getMyBookings(userEmail);
+
+        return ResponseEntity.ok(bookings);
     }
 }

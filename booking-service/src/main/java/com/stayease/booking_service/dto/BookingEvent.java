@@ -1,4 +1,4 @@
-package com.stayease.booking_service.entity;
+package com.stayease.booking_service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

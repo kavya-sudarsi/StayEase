@@ -1,5 +1,6 @@
 package com.stayease.booking_service.dto;
 
+import com.stayease.booking_service.entity.BookingStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,8 +11,16 @@ import java.time.LocalDate;
 public class BookingResponse {
 
     private Long id;
+
+    private String userEmail;
+
     private Long propertyId;
+
     private Long roomId;
-    private LocalDate bookingDate;
-    private String status;
+
+    private LocalDate checkInDate;
+
+    private LocalDate checkOutDate;
+
+    private BookingStatus status;
 }
