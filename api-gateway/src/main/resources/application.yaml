@@ -23,6 +23,11 @@ spring:
           predicates:
             - Path=/bookings/**
 
+        - id: payment-route
+          uri: lb://booking-service
+          predicates:
+            - Path=/payments/**
+
       discovery:
         locator:
           enabled: true
@@ -38,3 +43,4 @@ management:
     web:
       exposure:
         include: health,info
+
