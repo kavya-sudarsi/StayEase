@@ -114,4 +114,18 @@ public class PropertyService {
                 maxPrice
         );
     }
+    public List<Property> filterProperties(
+            String city,
+            GenderType gender,
+            Double minPrice,
+            Double maxPrice
+    ) {
+
+        return propertyRepository.filterProperties(
+                city,
+                gender,
+                minPrice,
+                maxPrice
+        );
+    }
 }

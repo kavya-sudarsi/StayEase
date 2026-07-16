@@ -23,4 +23,24 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
             @Param("minPrice") Double minPrice,
             @Param("maxPrice") Double maxPrice
     );
+
+    @Query("""
+    SELECT DISTINCT p
+    FROM Property p
+    JOIN p.rooms r
+    WHERE
+    (:city IS NULL OR LOWER(p.city) = LOWER(:city))
+    AND
+    (:gender IS NULL OR p.gender = :gender)
+    AND
+    (:minPrice IS NULL OR r.pricePerBed >= :minPrice)
+    AND
+    (:maxPrice IS NULL OR r.pricePerBed <= :maxPrice)
+    """)
+    List<Property> filterProperties(
+            @Param("city") String city,
+            @Param("gender") GenderType gender,
+            @Param("minPrice") Double minPrice,
+            @Param("maxPrice") Double maxPrice
+    );
 }

@@ -13,7 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
+import com.stayease.property_service.service.ImageUploadService;
+import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,6 +25,14 @@ public class PropertyController {
 
     private final PropertyService propertyService;
     private final RoomService roomService;
+    private final ImageUploadService imageUploadService;
+
+
+    @PostMapping("/upload-image")
+    public ResponseEntity<UploadResponse> uploadImage(@RequestParam("file") MultipartFile file) {
+
+        return ResponseEntity.ok(imageUploadService.uploadImage(file));
+    }
 
     // CREATE PROPERTY
     @PostMapping
@@ -264,6 +273,56 @@ public class PropertyController {
         }
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<PropertyResponse>> filterProperties(
+
+            @RequestParam(required = false)
+            String city,
+
+            @RequestParam(required = false)
+            String gender,
+
+            @RequestParam(required = false)
+            Double minPrice,
+
+            @RequestParam(required = false)
+            Double maxPrice
+    ) {
+
+        GenderType genderType = null;
+
+        if (gender != null && !gender.isBlank()) {
+
+            try {
+
+                genderType =
+                        GenderType.valueOf(
+                                gender.toUpperCase()
+                        );
+
+            } catch (IllegalArgumentException e) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Invalid gender type"
+                );
+            }
+        }
+
+        List<PropertyResponse> properties =
+                propertyService
+                        .filterProperties(
+                                city,
+                                genderType,
+                                minPrice,
+                                maxPrice
+                        )
+                        .stream()
+                        .map(this::mapToPropertyResponse)
+                        .toList();
+
+        return ResponseEntity.ok(properties);
+    }
     // PROPERTY RESPONSE MAPPING
     private PropertyResponse mapToPropertyResponse(
             Property property) {
