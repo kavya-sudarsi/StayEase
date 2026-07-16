@@ -3,11 +3,13 @@ package com.stayease.booking_service.controller;
 import com.stayease.booking_service.dto.BookingRequest;
 import com.stayease.booking_service.dto.BookingResponse;
 import com.stayease.booking_service.service.BookingService;
+import com.stayease.booking_service.dto.OwnerBookingResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -53,5 +55,17 @@ public class BookingController {
                 bookingService.getMyBookings(userEmail);
 
         return ResponseEntity.ok(bookings);
+    }
+    @GetMapping("/property/{propertyId}")
+    public ResponseEntity<List<OwnerBookingResponse>>
+    getBookingsByProperty(
+            @PathVariable Long propertyId
+    ) {
+
+        return ResponseEntity.ok(
+                bookingService.getBookingsByProperty(
+                        propertyId
+                )
+        );
     }
 }

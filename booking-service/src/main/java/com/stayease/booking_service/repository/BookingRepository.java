@@ -21,4 +21,6 @@ public interface BookingRepository
             LocalDate checkOutDate,
             LocalDate checkInDate
     );
+
+    List<Booking> findByPropertyId(Long propertyId);
 }

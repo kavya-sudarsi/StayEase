@@ -30,4 +30,16 @@ public class BookingResponse {
     private PaymentStatus paymentStatus;
 
     private String paymentId;
+
+    private String propertyName;
+
+    private String city;
+
+    private String state;
+
+    private String imageUrl;
+
+    private String roomNumber;
+
+    private String roomType;
 }

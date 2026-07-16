@@ -11,13 +11,32 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BookingEventProducer {
 
+    private static final String TOPIC = "booking-events";
+
     private final KafkaTemplate<String, BookingEvent> kafkaTemplate;
 
     public void sendEvent(BookingEvent event) {
-        kafkaTemplate.send("booking-events", event);
-        log.info("Kafka event sent: type={}, bookingId={}, roomId={}",
+
+        kafkaTemplate.send(TOPIC, event);
+
+        log.info("""
+                =================================================
+                Kafka Event Published
+                Event Type : {}
+                Booking Id : {}
+                User       : {}
+                Property   : {}
+                Room       : {}
+                Amount     : {}
+                Time       : {}
+                =================================================
+                """,
                 event.getEventType(),
                 event.getBookingId(),
-                event.getRoomId());
+                event.getUserEmail(),
+                event.getPropertyId(),
+                event.getRoomId(),
+                event.getAmount(),
+                event.getEventTime());
     }
 }
