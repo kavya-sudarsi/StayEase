@@ -1,0 +1,16 @@
+# Ignore log files
+*.log
+replay_pid*.log
+
+# Ignore build artifacts
+target/
+build/
+dist/
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.iml
+
+# Ignore node_modules if frontend uses React
+node_modules/
