@@ -36,7 +36,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://discovery-server:8761/eureka
+      defaultZone: ${EUREKA_SERVER_URL}
 
 management:
   endpoints:
