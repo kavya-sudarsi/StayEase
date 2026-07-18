@@ -8,7 +8,7 @@ spring:
 
   datasource:
     url: ${MYSQL_URL}
-    username: ${MYSQL_USER}
+    username: ${MYSQLUSER}
     password: ${MYSQLPASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
@@ -31,7 +31,7 @@ springdoc:
 eureka:
   client:
     service-url:
-      defaultZone: http://discovery-server:8761/eureka
+      defaultZone: ${EUREKA_SERVER_URL}
 
 management:
   endpoints:
