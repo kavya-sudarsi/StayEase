@@ -10,7 +10,6 @@ spring:
       max-request-size: 5MB
 
 
-
   datasource:
     url: ${MYSQL_URL}
     username: ${MYSQLUSER}
@@ -35,7 +34,7 @@ springdoc:
 eureka:
   client:
     service-url:
-      defaultZone: http://discovery-server:8761/eureka
+      defaultZone: ${EUREKA_SERVER_URL}
 
 management:
   endpoints:
