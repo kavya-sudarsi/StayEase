@@ -35,7 +35,7 @@ springdoc:
 eureka:
   client:
     service-url:
-      defaultZone: http://discovery-server:8761/eureka
+      defaultZone: ${EUREKA_SERVER_URL}
 
 resilience4j:
   circuitbreaker:
@@ -47,8 +47,8 @@ resilience4j:
         waitDurationInOpenState: 10s
 
 razorpay:
-  key: rzp_test_StzsLlHlO9Gvsy
-  secret: PAgbv0Pk1y7mkEJ8gbCuNJA7
+  key: ${RAZORPAY_KEY}
+  secret: ${RAZORPAY_SECRET}
 
 management:
   endpoints:
