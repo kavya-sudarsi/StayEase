@@ -55,5 +55,11 @@ management:
     web:
       exposure:
         include: health,info
+      
+
+
+property:
+  service:
+    url: https://property-service-5n1v.onrender.com
 
 

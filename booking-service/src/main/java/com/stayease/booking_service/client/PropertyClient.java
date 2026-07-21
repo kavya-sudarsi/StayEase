@@ -5,7 +5,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import com.stayease.booking_service.dto.PropertyDetailsResponse;
 
-@FeignClient(name = "property-service")
+@FeignClient(
+        name = "property-service",
+        url = "${property.service.url}"
+)
 public interface PropertyClient {
 
     @PutMapping("/properties/rooms/{roomId}/decrease")
