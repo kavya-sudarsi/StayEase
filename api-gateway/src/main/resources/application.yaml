@@ -14,17 +14,17 @@ spring:
             - Path=/auth/**
 
         - id: property-service
-          uri: lb://property-service
+          uri: https://property-service-5n1v.onrender.com
           predicates:
             - Path=/properties/**
 
         - id: booking-service
-          uri: lb://booking-service
+          uri: https://booking-service-j42a.onrender.com
           predicates:
             - Path=/bookings/**
 
         - id: payment-route
-          uri: lb://booking-service
+          uri: https://booking-service-j42a.onrender.com
           predicates:
             - Path=/payments/**
 
