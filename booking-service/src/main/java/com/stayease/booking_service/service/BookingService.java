@@ -85,20 +85,20 @@ public class BookingService {
         Booking saved =
                 bookingRepository.save(booking);
 
-        bookingEventProducer.sendEvent(
-
-                BookingEvent.builder()
-                        .bookingId(saved.getId())
-                        .userEmail(saved.getUserEmail())
-                        .propertyId(saved.getPropertyId())
-                        .roomId(saved.getRoomId())
-                        .eventType("BOOKING_CREATED")
-                        .amount(saved.getAmount())
-                        .paymentId(saved.getPaymentId())
-                        .message("Booking created successfully")
-                        .eventTime(java.time.LocalDateTime.now())
-                        .build()
-        );
+//        bookingEventProducer.sendEvent(
+//
+//                BookingEvent.builder()
+//                        .bookingId(saved.getId())
+//                        .userEmail(saved.getUserEmail())
+//                        .propertyId(saved.getPropertyId())
+//                        .roomId(saved.getRoomId())
+//                        .eventType("BOOKING_CREATED")
+//                        .amount(saved.getAmount())
+//                        .paymentId(saved.getPaymentId())
+//                        .message("Booking created successfully")
+//                        .eventTime(java.time.LocalDateTime.now())
+//                        .build()
+//        );
 
         return mapToResponse(saved);
     }
@@ -173,20 +173,20 @@ public class BookingService {
         Booking updated =
                 bookingRepository.save(booking);
 
-        bookingEventProducer.sendEvent(
-
-                BookingEvent.builder()
-                        .bookingId(updated.getId())
-                        .userEmail(updated.getUserEmail())
-                        .propertyId(updated.getPropertyId())
-                        .roomId(updated.getRoomId())
-                        .eventType("BOOKING_CANCELLED")
-                        .amount(updated.getAmount())
-                        .paymentId(updated.getPaymentId())
-                        .message("Booking cancelled")
-                        .eventTime(java.time.LocalDateTime.now())
-                        .build()
-        );
+//        bookingEventProducer.sendEvent(
+//
+//                BookingEvent.builder()
+//                        .bookingId(updated.getId())
+//                        .userEmail(updated.getUserEmail())
+//                        .propertyId(updated.getPropertyId())
+//                        .roomId(updated.getRoomId())
+//                        .eventType("BOOKING_CANCELLED")
+//                        .amount(updated.getAmount())
+//                        .paymentId(updated.getPaymentId())
+//                        .message("Booking cancelled")
+//                        .eventTime(java.time.LocalDateTime.now())
+//                        .build()
+//        );
 
         return mapToResponse(updated);
     }
@@ -282,20 +282,20 @@ public class BookingService {
                         booking
                 );
 
-                bookingEventProducer.sendEvent(
-
-                        BookingEvent.builder()
-                                .bookingId(booking.getId())
-                                .userEmail(booking.getUserEmail())
-                                .propertyId(booking.getPropertyId())
-                                .roomId(booking.getRoomId())
-                                .eventType("BOOKING_COMPLETED")
-                                .amount(booking.getAmount())
-                                .paymentId(booking.getPaymentId())
-                                .message("Stay completed")
-                                .eventTime(java.time.LocalDateTime.now())
-                                .build()
-                );
+//                bookingEventProducer.sendEvent(
+//
+//                        BookingEvent.builder()
+//                                .bookingId(booking.getId())
+//                                .userEmail(booking.getUserEmail())
+//                                .propertyId(booking.getPropertyId())
+//                                .roomId(booking.getRoomId())
+//                                .eventType("BOOKING_COMPLETED")
+//                                .amount(booking.getAmount())
+//                                .paymentId(booking.getPaymentId())
+//                                .message("Stay completed")
+//                                .eventTime(java.time.LocalDateTime.now())
+//                                .build()
+//                );
 
                 log.info(
                         "Booking {} marked as COMPLETED",
