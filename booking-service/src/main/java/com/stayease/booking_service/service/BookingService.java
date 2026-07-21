@@ -106,12 +106,14 @@ public class BookingService {
     public BookingResponse bookingFallback(
             String userEmail,
             BookingRequest request,
-            Exception ex
-    ) {
+            Exception ex) {
+
+        ex.printStackTrace();
+        log.error("Fallback triggered", ex);
 
         throw new ResponseStatusException(
                 HttpStatus.SERVICE_UNAVAILABLE,
-                "Property service unavailable. Please try again later."
+                ex.getClass().getName() + " : " + ex.getMessage()
         );
     }
 
