@@ -6,6 +6,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
+
 @Configuration
 public class CorsConfig {
 
@@ -14,7 +16,10 @@ public class CorsConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.addAllowedOrigin("http://localhost:5173"); // allow all (for dev)
+        config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "https://stayeasefrontend.vercel.app"
+        ));
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
 
