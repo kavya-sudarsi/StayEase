@@ -18,7 +18,7 @@ public class CorsConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://stayeasefrontend.vercel.app"
+                "https://stay-ease-frontend-kappa.vercel.app"
         ));
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
