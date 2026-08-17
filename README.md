@@ -2,205 +2,691 @@
 
 ## 📌 Overview
 
-**StayEase** is a **Spring Boot microservices-based accommodation management platform** for managing **PG/hostel properties, room inventory, and booking workflows**.
+**StayEase** is a full-stack **microservices-based accommodation platform** designed for managing PGs, hostels, rooms, bed inventory, bookings, and online payments.
 
-The system demonstrates a **real-world microservices architecture** with:
+The application supports two types of users:
 
-- API Gateway routing  
-- Service discovery using Eureka  
-- JWT-based authentication  
-- Role-based authorization  
-- Inter-service communication using OpenFeign  
-- Distributed inventory management  
+* **OWNER** – Manage properties, rooms, and bed availability
+* **USER** – Browse properties, select rooms, make bookings, and complete payments
 
+The project demonstrates a real-world backend architecture using **Spring Boot, Spring Cloud, JWT authentication, Eureka Service Discovery, API Gateway, OpenFeign, MySQL, Razorpay, Cloudinary**, and a **React frontend**.
 
-## 🏗 Architecture Overview
+The application is deployed and accessible online using **Vercel, Render, and Railway**.
 
-Client  
+---
 
-API Gateway  
+## 🌐 Live Application
 
-Eureka Server  
+### Frontend
 
-Microservices
-- Auth Service
-- Property Service
-- Booking Service
+**StayEase:**
+https://stay-ease-frontend-kappa.vercel.app/
 
-Database Layer
-- Separate MySQL Database per Service
+### Backend API Gateway
 
-Each microservice is **independently deployable** and communicates using **service discovery and Feign clients**.
+https://stayease-nwql.onrender.com/
 
-## 🔧 Microservices
+The React frontend communicates with the backend through the API Gateway.
 
-### Auth Service
+---
 
-Handles **authentication and user management**.
+# 🏗 Architecture Overview
 
-**Features**
+```text
+                    ┌──────────────────────┐
+                    │     React Frontend   │
+                    │   Vercel Deployment  │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │     API Gateway      │
+                    │   Spring Cloud       │
+                    │      Gateway         │
+                    └──────────┬───────────┘
+                               │
+              ┌────────────────┼────────────────┐
+              │                │                │
+              ▼                ▼                ▼
+       ┌────────────┐   ┌──────────────┐  ┌───────────────┐
+       │   Auth     │   │   Property   │  │    Booking    │
+       │  Service   │   │   Service    │  │    Service    │
+       │   :8081    │   │    :8082     │  │     :8083     │
+       └─────┬──────┘   └──────┬───────┘  └───────┬───────┘
+             │                 │                   │
+             ▼                 ▼                   ▼
+       ┌────────────┐   ┌──────────────┐  ┌───────────────┐
+       │   MySQL    │   │    MySQL     │  │     MySQL     │
+       │ Auth DB    │   │ Property DB  │  │   Booking DB  │
+       └────────────┘   └──────────────┘  └───────────────┘
+                                 ▲
+                                 │
+                           OpenFeign
+                                 │
+                                 │
+                         Booking Service
+                         ↔ Property Service
 
-- User registration  
-- Login authentication  
-- JWT token generation  
-- Role-based access  
+                    ┌──────────────────────┐
+                    │    Eureka Server     │
+                    │   Service Discovery  │
+                    └──────────────────────┘
 
-**Roles Supported**
+External Services:
 
-- OWNER  
-- USER  
+Cloudinary → Property Image Storage
+Razorpay   → Online Payments
+Railway    → MySQL Hosting
+Render     → Backend Deployment
+Vercel     → Frontend Deployment
+```
 
+---
 
-### Property Service
+# 🔧 Microservices
 
-Manages **properties, rooms, and bed inventory**.
+## 1. Auth Service
 
-**Features**
+Handles authentication and user management.
 
-- Property creation (OWNER only)  
-- Room management  
-- Bed availability tracking  
-- Increase / decrease available beds  
+### Features
 
+* User registration
+* User login
+* Password encryption using BCrypt
+* JWT token generation
+* JWT-based authentication
+* Role-based authorization
 
-### Booking Service
+### Roles
 
-Handles **booking operations**.
+| Role  | Description                                      |
+| ----- | ------------------------------------------------ |
+| OWNER | Can create and manage properties and rooms       |
+| USER  | Can browse properties and create/cancel bookings |
 
-**Features**
+---
 
-- Create booking  
-- Cancel booking  
-- Feign communication with Property Service  
-- Bed inventory synchronization  
-- Conflict handling when beds are unavailable  
+# 2. Property Service
 
+Manages accommodation properties, rooms, and bed inventory.
 
-### API Gateway
+### Features
 
-Acts as the **single entry point** for all requests.
+* Create property
+* Update property
+* Delete property
+* View properties
+* Search properties
+* Filter properties
+* Manage rooms
+* Track available beds
+* Increase/decrease bed availability
+* Owner-specific property management
+* Property image upload
+* Cloudinary image storage
 
-**Responsibilities**
+### Property Information
 
-- Request routing  
-- JWT validation  
-- Forwarding requests to microservices  
+A property can contain:
 
+* Name
+* Address
+* City
+* State
+* Pincode
+* Property type
+* Gender category
+* Contact number
+* Description
+* Amenities
+* Rooms
+* Bed availability
+* Property image
 
-### Eureka Server
+---
 
-Provides **service discovery**.
+# 3. Booking Service
 
-**Responsibilities**
+Handles the complete booking workflow.
 
-- Register services dynamically  
-- Enable services to locate each other  
-- Remove hardcoded URLs  
+### Features
 
+* Create booking
+* Cancel booking
+* View user's bookings
+* View property bookings
+* Check room availability
+* Prevent booking when beds are unavailable
+* Communicate with Property Service using OpenFeign
+* Update bed inventory after booking
+* Restore inventory after cancellation
 
+### Booking Flow
 
-## 🔐 Security
+```text
+USER
+ │
+ ▼
+Create Booking
+ │
+ ▼
+Booking Service
+ │
+ ├── Check existing booking
+ │
+ ├── Get room details
+ │
+ ├── Check available beds
+ │
+ ▼
+Property Service
+ │
+ ├── Decrease available beds
+ │
+ ▼
+Booking Created
+```
 
-The system uses **JWT-based authentication**.
+---
+
+# 4. API Gateway
+
+The API Gateway acts as the **single entry point** for the frontend.
+
+### Responsibilities
+
+* Route requests to microservices
+* JWT token validation
+* Forward authenticated user information
+* Role information propagation
+* Centralized API entry point
+* Service routing
+
+Example:
+
+```text
+/auth/**       → Auth Service
+
+/properties/** → Property Service
+
+/bookings/**   → Booking Service
+
+/payments/**   → Booking Service
+```
+
+The frontend does not directly communicate with individual backend services.
+
+---
+
+# 5. Eureka Server
+
+Eureka is used for **service discovery**.
+
+### Responsibilities
+
+* Register microservices
+* Maintain service registry
+* Allow services to discover each other
+* Support dynamic service locations
+* Remove dependency on hardcoded internal service addresses
+
+Services registered with Eureka include:
+
+```text
+AUTH-SERVICE
+PROPERTY-SERVICE
+BOOKING-SERVICE
+API-GATEWAY
+```
+
+---
+
+# 🔐 Security
+
+StayEase uses **JWT-based authentication**.
 
 ### Authentication Flow
 
-1. User logs in with credentials  
-2. Request is processed by the Auth Service  
-3. Auth Service generates a JWT token  
-4. Client includes the JWT token in subsequent requests  
-5. API Gateway validates the token  
-6. Request is forwarded to the respective microservice  
+```text
+User
+ │
+ ▼
+Login
+ │
+ ▼
+Auth Service
+ │
+ ▼
+JWT Token
+ │
+ ▼
+React Frontend
+ │
+ ▼
+Authorization Header
+ │
+ ▼
+API Gateway
+ │
+ ▼
+JWT Validation
+ │
+ ▼
+Microservice
+```
 
+The JWT contains information such as:
 
-## 👥 Role-Based Access
+* User email
+* User role
+* Token expiration
 
-| Role | Permissions |
-|-----|-------------|
-| OWNER | Create properties and rooms |
-| USER | Create and cancel bookings |
+The API Gateway validates the token before forwarding protected requests.
 
+---
 
-## 📦 Booking Workflow
+# 👥 Role-Based Authorization
 
-1. User logs in and receives a JWT token  
-2. Client sends request with token  
-3. API Gateway validates the token  
-4. Booking Service processes the request  
-5. Booking Service calls Property Service using Feign  
-6. Property Service updates bed availability  
-7. Booking is created if beds are available  
+| Feature                  | OWNER | USER |
+| ------------------------ | :---: | :--: |
+| Register                 |   ✅   |   ✅  |
+| Login                    |   ✅   |   ✅  |
+| Browse Properties        |   ✅   |   ✅  |
+| Search Properties        |   ✅   |   ✅  |
+| View Property Details    |   ✅   |   ✅  |
+| Create Property          |   ✅   |   ❌  |
+| Update Property          |   ✅   |   ❌  |
+| Delete Property          |   ✅   |   ❌  |
+| Manage Rooms             |   ✅   |   ❌  |
+| Create Booking           |   ❌   |   ✅  |
+| Cancel Booking           |   ❌   |   ✅  |
+| View Own Bookings        |   ❌   |   ✅  |
+| Manage Property Bookings |   ✅   |   ❌  |
 
+---
 
-## 🛠 Tech Stack
+# 💳 Payment Integration
 
-| Technology | Purpose |
-|------------|--------|
-| Java 17 | Programming language |
-| Spring Boot | Microservices framework |
-| Spring Cloud | Gateway & service discovery |
-| Eureka Server | Service registry |
-| Spring Security | Authentication & authorization |
-| JWT | Secure authentication |
-| OpenFeign | Inter-service communication |
-| JPA / Hibernate | ORM |
-| MySQL | Database |
-| Maven | Dependency management |
-| Docker | Containerization |
+StayEase integrates **Razorpay** for online booking payments.
 
+### Payment Flow
 
-## 🗄 Database Strategy
+```text
+User
+ │
+ ▼
+Create Booking
+ │
+ ▼
+Create Razorpay Order
+ │
+ ▼
+Razorpay Checkout
+ │
+ ▼
+Payment
+ │
+ ▼
+Razorpay Response
+ │
+ ▼
+Payment Verification
+ │
+ ▼
+Booking Payment Status Updated
+```
 
-Each microservice maintains its **own database**.
+The application verifies the Razorpay payment before treating the booking payment as successful.
 
-| Service | Database |
-|--------|---------|
-| Auth Service | stayease_auth |
-| Property Service | stayease_property |
-| Booking Service | stayease_booking |
+---
 
-This ensures **loose coupling and independent scaling**.
+# 🖼 Image Management
 
+Property images are uploaded to **Cloudinary** instead of being stored on the application server.
 
-## 📸 Screenshots
-<img width="1915" height="953" alt="Screenshot 2026-03-24 175845" src="https://github.com/user-attachments/assets/0fb1cf2c-69fd-4868-bc1e-192b60e3bef1" /><img width="330" height="127" alt="Screenshot 2026-03-24 175913" src="https://github.com/user-attachments/assets/638a400d-5bd5-4c38-8207-78cfa8f5e77c" />
-<img width="1373" height="30" alt="Screenshot 2026-03-24 180040" src="https://github.com/user-attachments/assets/10bb232c-46e0-4ae4-abdd-3f3d5b4650fc" />
+### Flow
 
+```text
+React Frontend
+      │
+      ▼
+Property Service
+      │
+      ▼
+Cloudinary
+      │
+      ▼
+Image URL
+      │
+      ▼
+MySQL
+```
 
-## ▶ Running the Project
+The database stores the image URL while the actual image is managed by Cloudinary.
 
-### 1. Clone the repository
+This avoids relying on the local filesystem of the deployed Render instance.
+
+---
+
+# 🔄 Inter-Service Communication
+
+Booking Service communicates with Property Service using **OpenFeign**.
+
+Example:
+
+```text
+Booking Service
+       │
+       │ OpenFeign
+       ▼
+Property Service
+       │
+       ├── Get Room
+       ├── Get Property
+       ├── Decrease Available Beds
+       └── Increase Available Beds
+```
+
+This keeps service communication clean while allowing each service to remain independently deployable.
+
+---
+
+# 🗄 Database Strategy
+
+Each microservice maintains its own database.
+
+| Service          | Database          |
+| ---------------- | ----------------- |
+| Auth Service     | Auth Database     |
+| Property Service | Property Database |
+| Booking Service  | Booking Database  |
+
+The databases are hosted using **Railway MySQL**.
+
+This follows the microservices principle of **database-per-service**, keeping services loosely coupled.
+
+---
+
+# 🛠 Technology Stack
+
+## Backend
+
+| Technology           | Purpose                     |
+| -------------------- | --------------------------- |
+| Java 17              | Programming Language        |
+| Spring Boot          | Microservices Development   |
+| Spring Cloud         | Cloud-native Microservices  |
+| Spring Cloud Gateway | API Gateway                 |
+| Eureka               | Service Discovery           |
+| Spring Security      | Security                    |
+| JWT                  | Authentication              |
+| OpenFeign            | Inter-Service Communication |
+| Spring Data JPA      | Database Access             |
+| Hibernate            | ORM                         |
+| MySQL                | Relational Database         |
+| Maven                | Build Tool                  |
+| Resilience4j         | Fault Tolerance             |
+| Bean Validation      | Request Validation          |
+
+## Frontend
+
+| Technology   | Purpose                |
+| ------------ | ---------------------- |
+| React        | UI Development         |
+| Vite         | Frontend Build Tool    |
+| React Router | Client-side Routing    |
+| Axios        | REST API Communication |
+| CSS          | UI Styling             |
+
+## External Services
+
+| Service    | Purpose             |
+| ---------- | ------------------- |
+| Razorpay   | Online Payments     |
+| Cloudinary | Image Storage       |
+| Railway    | MySQL Hosting       |
+| Render     | Backend Deployment  |
+| Vercel     | Frontend Deployment |
+
+---
+
+# 📦 Major Application Features
+
+### Authentication
+
+* Registration
+* Login
+* JWT authentication
+* BCrypt password encryption
+* Role-based access
+
+### Property Management
+
+* Create property
+* Edit property
+* Delete property
+* Property details
+* Property search
+* Property filtering
+* Room management
+* Bed inventory
+
+### Booking
+
+* Room selection
+* Check-in/check-out dates
+* Availability checking
+* Booking creation
+* Booking cancellation
+* Booking history
+* Owner booking management
+
+### Payments
+
+* Razorpay order creation
+* Razorpay checkout
+* Payment verification
+* Booking payment status
+
+### Images
+
+* Property image upload
+* Cloudinary integration
+* Persistent image URLs
+
+---
+
+# 🚀 Deployment
+
+The application is deployed using free cloud services.
+
+### Frontend
+
+**Vercel**
+
+```text
+https://stay-ease-frontend-kappa.vercel.app/
+```
+
+### Backend
+
+Backend microservices are deployed on **Render**.
+
+```text
+API Gateway
+Auth Service
+Property Service
+Booking Service
+Eureka Server
+```
+
+### Database
+
+MySQL databases are hosted using **Railway**.
+
+### Image Storage
+
+Property images are stored using **Cloudinary**.
+
+---
+
+# ▶ Running the Project Locally
+
+## 1. Clone the repository
 
 ```bash
 git clone https://github.com/your-repo/stayease.git
 ```
-### 2. Create MySQL Databases
+
+---
+
+## 2. Create MySQL Databases
+
+Create separate databases for each service:
+
+```text
 stayease_auth
 stayease_property
 stayease_booking
-### 3. Start Services in Order
+```
 
-Eureka Server
+---
 
-Auth Service
+## 3. Configure Environment Variables
 
-Property Service
+Configure the required environment variables for:
 
-Booking Service
+```text
+MYSQL_URL
+MYSQLUSER
+MYSQLPASSWORD
 
-API Gateway
+EUREKA_SERVER_URL
 
-### 4. Access the Application
-http://localhost:8080
+RAZORPAY_KEY
+RAZORPAY_SECRET
 
-## 👩‍💻 Author
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+```
 
-#### Kavya Sudarsi
+---
+
+## 4. Start Services
+
+Start the services in the following order:
+
+```text
+1. Eureka Server
+2. Auth Service
+3. Property Service
+4. Booking Service
+5. API Gateway
+6. React Frontend
+```
+
+---
+
+## 5. Start Frontend
+
+Navigate to the frontend project:
+
+```bash
+npm install
+npm run dev
+```
+
+The frontend will normally be available at:
+
+```text
+http://localhost:5173
+```
+
+---
+
+# 📸 Screenshots
+
+### Login / Registration
+
+*Add screenshot here*
+
+### User Dashboard
+
+*Add screenshot here*
+
+### Property Details
+
+*Add screenshot here*
+
+### Owner Dashboard
+
+*Add screenshot here*
+
+### Booking
+
+*Add screenshot here*
+
+### Payment
+
+*Add screenshot here*
+
+---
+
+# 💡 Key Technical Highlights
+
+The project demonstrates practical experience with:
+
+* Microservices architecture
+* API Gateway pattern
+* Service discovery
+* JWT authentication
+* Role-based authorization
+* REST API development
+* OpenFeign communication
+* Database-per-service architecture
+* Distributed inventory management
+* Payment gateway integration
+* Cloud-based image storage
+* Exception handling
+* Request validation
+* Fault tolerance
+* Independent service deployment
+* Cloud deployment and environment configuration
+
+---
+
+# 🎯 Project Objective
+
+StayEase was built as a hands-on full-stack project to understand how a production-style application can be designed using **Java, Spring Boot, Spring Cloud, React, MySQL, and cloud services**.
+
+The project focuses on solving practical problems such as:
+
+* Authentication and authorization
+* Property and room management
+* Bed inventory synchronization
+* Booking conflicts
+* Payment processing
+* Service-to-service communication
+* Cloud deployment
+* Persistent image storage
+
+---
+
+# 👩‍💻 Author
+
+### Kavya Sudarsi
+
+**Java Full Stack Developer**
 
 Built as a hands-on project to demonstrate:
 
-- Microservices architecture
-
-- Secure service communication
-
-- Distributed system design
+* Java & Spring Boot development
+* Microservices architecture
+* REST API development
+* React frontend development
+* Secure authentication
+* Distributed service communication
+* Payment integration
+* Cloud deployment
